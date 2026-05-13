@@ -14,7 +14,7 @@ function Livestock() {
     try {
 
       const res = await axios.get(
-        "http://127.0.0.1:8000/livestock"
+        "https://livestock-backend-x7k6.onrender.com/livestock"
       );
 
       setLivestock(res.data);
@@ -39,7 +39,7 @@ function Livestock() {
     try {
 
       await axios.delete(
-        `http://127.0.0.1:8000/delete_livestock/${index}`
+        `https://livestock-backend-x7k6.onrender.com/delete_livestock/${index}`
       );
 
       fetchLivestock();

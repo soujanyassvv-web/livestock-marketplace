@@ -34,11 +34,11 @@ function AddLivestock() {
     data.append("file", image);
 
     const res = await axios.post(
-      "http://127.0.0.1:8000/upload",
+      "https://livestock-backend-x7k6.onrender.com/upload",
       data
     );
 
-    return `http://127.0.0.1:8000${res.data.path}`;
+    return `https://livestock-backend-x7k6.onrender.com${res.data.path}`;
   };
 
   // ADD LIVESTOCK
@@ -50,7 +50,7 @@ function AddLivestock() {
       const imageUrl = await uploadImage();
 
       const res = await axios.post(
-        "http://127.0.0.1:8000/add_livestock",
+        "https://livestock-backend-x7k6.onrender.com/add_livestock",
         null,
         {
           params: {

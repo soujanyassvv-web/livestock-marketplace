@@ -11,7 +11,7 @@ function Signup() {
     try {
 
       const res = await axios.post(
-        "http://127.0.0.1:8000/signup",
+        "https://livestock-backend-x7k6.onrender.com/signup",
         null,
         {
           params: {
