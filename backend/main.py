@@ -172,5 +172,6 @@ def upload(file: UploadFile = File(...)):
 
     return {
         "filename": file.filename,
-        "path": f"/uploads/{file.filename}"
+        "filename": file.filename,
+"path": f"https://livestock-backend-x7k6.onrender.com/uploads/{file.filename}"
     }
