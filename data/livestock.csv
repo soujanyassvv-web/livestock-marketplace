@@ -1,0 +1,4 @@
+Name,Breed,Age,Price,Contact,Owner,Image
+cow,gir,3,40000,9901409147,chandru,
+cow,gir,3,40000,9901409147,chandru,http://127.0.0.1:8000/uploads/gir.jpg
+goat,jamunapyari,1,10000,9916465100,chandru,http://127.0.0.1:8000/uploads/jamuna.jpg
