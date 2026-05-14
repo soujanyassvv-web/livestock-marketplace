@@ -164,7 +164,12 @@ function Livestock() {
         }}
       >
 
-        {filteredLivestock.map((item, index) => (
+        {filteredLivestock.map((item, index) => {
+
+  console.log(item.Image);   // 👈 ADD THIS LINE
+
+  return (
+    <div key={index}>
 
           <div
             key={index}
