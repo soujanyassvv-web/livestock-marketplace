@@ -6,13 +6,19 @@ import os
 import shutil
 
 app = FastAPI()
-UPLOAD_FOLDER = "uploads"
 
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+# ---------------- PATHS ----------------
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")   # ✅ FIXED
+DATA_PATH = os.path.join(BASE_DIR, "..", "data", "livestock.csv")
+USER_PATH = os.path.join(BASE_DIR, "..", "data", "users.csv")
+
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# ✅ mount AFTER defining correct folder
 app.mount("/uploads", StaticFiles(directory=UPLOAD_FOLDER), name="uploads")
-
 
 # ---------------- CORS ----------------
 
@@ -24,15 +30,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ---------------- PATHS ----------------
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-DATA_PATH = os.path.join(BASE_DIR, "..", "data", "livestock.csv")
-USER_PATH = os.path.join(BASE_DIR, "..", "data", "users.csv")
-UPLOAD_FOLDER = os.path.join(BASE_DIR, "..", "uploads")
-
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # ---------------- INIT FILES ----------------
 
@@ -165,13 +162,16 @@ def delete_livestock(item_id: int):
 @app.post("/upload")
 def upload(file: UploadFile = File(...)):
 
-    file_path = os.path.join(UPLOAD_FOLDER, file.filename)
+    import uuid
+
+    # ✅ create unique filename
+    unique_name = f"{uuid.uuid4()}_{file.filename}"
+    file_path = os.path.join(UPLOAD_FOLDER, unique_name)
 
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
     return {
-        "filename": file.filename,
-        "filename": file.filename,
-"path": f"https://livestock-backend-x7k6.onrender.com/uploads/{file.filename}"
+        "filename": unique_name,
+        "path": f"https://livestock-backend-x7k6.onrender.com/uploads/{unique_name}"
     }
