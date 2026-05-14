@@ -12,9 +12,9 @@ from fastapi.staticfiles import StaticFiles
 
 # ---------------- CLOUDINARY CONFIG ----------------
 cloudinary.config(
-    cloud_name=os.getenv("CLOUD_NAME", ""),
-    api_key=os.getenv("CLOUD_API_KEY", ""),
-    api_secret=os.getenv("CLOUD_API_SECRET", "")
+    cloud_name=os.getenv("dwraiuxjj", ""),
+    api_key=os.getenv("588174946831383", ""),
+    api_secret=os.getenv("fatOe8qWlLhbSdn16RUjG4dh_zY", "")
 )
 
 # ---------------- APP INIT ----------------
