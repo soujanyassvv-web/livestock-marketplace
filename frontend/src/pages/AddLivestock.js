@@ -38,7 +38,7 @@ function AddLivestock() {
       data
     );
 
-    return `https://livestock-backend-x7k6.onrender.com${res.data.path}`;
+    return res.data.path;
   };
 
   // ADD LIVESTOCK
