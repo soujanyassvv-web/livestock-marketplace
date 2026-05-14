@@ -1,34 +1,41 @@
-import cloudinary
-import cloudinary.uploader
-from fastapi.staticfiles import StaticFiles
-from fastapi import FastAPI, UploadFile, File
-from fastapi.middleware.cors import CORSMiddleware
-import pandas as pd
 import os
 import shutil
+import pandas as pd
 
+import cloudinary
+import cloudinary.uploader
+
+from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+
+
+# ---------------- CLOUDINARY CONFIG ----------------
 cloudinary.config(
-    cloud_name="dwraiuxjj",
-    api_key="588174946831383",
-    api_secret="fatOe8qWlLhbSdn16RUjG4dh_zY"
+    cloud_name=os.getenv("CLOUD_NAME", ""),
+    api_key=os.getenv("CLOUD_API_KEY", ""),
+    api_secret=os.getenv("CLOUD_API_SECRET", "")
 )
+
+# ---------------- APP INIT ----------------
 app = FastAPI()
 
-# ---------------- PATHS ----------------
-
+# ---------------- BASE PATHS ----------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")   # ✅ FIXED
-DATA_PATH = os.path.join(BASE_DIR, "..", "data", "livestock.csv")
-USER_PATH = os.path.join(BASE_DIR, "..", "data", "users.csv")
+DATA_DIR = os.path.join(BASE_DIR, "..", "data")
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
 
+os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# ✅ mount AFTER defining correct folder
+DATA_PATH = os.path.join(DATA_DIR, "livestock.csv")
+USER_PATH = os.path.join(DATA_DIR, "users.csv")
+
+# ---------------- STATIC FILES ----------------
 app.mount("/uploads", StaticFiles(directory=UPLOAD_FOLDER), name="uploads")
 
 # ---------------- CORS ----------------
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -37,42 +44,31 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-# ---------------- INIT FILES ----------------
-
+# ---------------- INIT CSV FILES ----------------
 if not os.path.exists(DATA_PATH):
     pd.DataFrame(columns=[
-        "Name",
-        "Breed",
-        "Age",
-        "Price",
-        "Contact",
-        "Owner",
-        "Image"
+        "Name", "Breed", "Age", "Price", "Contact", "Owner", "Image"
     ]).to_csv(DATA_PATH, index=False)
 
 if not os.path.exists(USER_PATH):
     pd.DataFrame(columns=[
-        "Username",
-        "Password"
+        "Username", "Password"
     ]).to_csv(USER_PATH, index=False)
 
-# ---------------- HOME ----------------
 
+# ---------------- HOME ----------------
 @app.get("/")
 def home():
     return {"message": "Backend running successfully"}
 
-# ---------------- SIGNUP ----------------
 
+# ---------------- SIGNUP ----------------
 @app.post("/signup")
 def signup(username: str, password: str):
 
     users = pd.read_csv(USER_PATH)
 
-    existing = users[users["Username"] == username]
-
-    if not existing.empty:
+    if (users["Username"] == username).any():
         return {"message": "User already exists"}
 
     new_user = pd.DataFrame([{
@@ -81,13 +77,12 @@ def signup(username: str, password: str):
     }])
 
     users = pd.concat([users, new_user], ignore_index=True)
-
     users.to_csv(USER_PATH, index=False)
 
     return {"message": "Signup successful"}
 
-# ---------------- LOGIN ----------------
 
+# ---------------- LOGIN ----------------
 @app.post("/login")
 def login(username: str, password: str):
 
@@ -103,8 +98,8 @@ def login(username: str, password: str):
 
     return {"message": "Login successful"}
 
-# ---------------- ADD LIVESTOCK ----------------
 
+# ---------------- ADD LIVESTOCK ----------------
 @app.post("/add_livestock")
 def add_livestock(
     name: str,
@@ -129,43 +124,35 @@ def add_livestock(
     }])
 
     livestock = pd.concat([livestock, new_item], ignore_index=True)
-
     livestock.to_csv(DATA_PATH, index=False)
 
     return {"message": "Livestock added successfully"}
 
-# ---------------- GET LIVESTOCK ----------------
 
+# ---------------- GET LIVESTOCK ----------------
 @app.get("/livestock")
 def get_livestock():
 
-    try:
+    livestock = pd.read_csv(DATA_PATH).fillna("")
+    return livestock.to_dict(orient="records")
 
-        livestock = pd.read_csv(DATA_PATH)
-
-        livestock = livestock.fillna("")
-
-        return livestock.to_dict(orient="records")
-
-    except Exception as e:
-
-        return {"error": str(e)}
 
 # ---------------- DELETE LIVESTOCK ----------------
-
 @app.delete("/delete_livestock/{item_id}")
 def delete_livestock(item_id: int):
 
     livestock = pd.read_csv(DATA_PATH)
 
-    livestock = livestock.drop(item_id).reset_index(drop=True)
+    if item_id < 0 or item_id >= len(livestock):
+        return {"error": "Invalid item ID"}
 
+    livestock = livestock.drop(item_id).reset_index(drop=True)
     livestock.to_csv(DATA_PATH, index=False)
 
     return {"message": "Deleted successfully"}
 
-# ---------------- IMAGE UPLOAD ----------------
 
+# ---------------- IMAGE UPLOAD ----------------
 @app.post("/upload")
 def upload(file: UploadFile = File(...)):
 
