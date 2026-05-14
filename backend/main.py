@@ -1,3 +1,5 @@
+import cloudinary
+import cloudinary.uploader
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
@@ -5,6 +7,11 @@ import pandas as pd
 import os
 import shutil
 
+cloudinary.config(
+    cloud_name="dwraiuxjj",
+    api_key="588174946831383",
+    api_secret="fatOe8qWlLhbSdn16RUjG4dh_zY"
+)
 app = FastAPI()
 
 # ---------------- PATHS ----------------
@@ -162,16 +169,9 @@ def delete_livestock(item_id: int):
 @app.post("/upload")
 def upload(file: UploadFile = File(...)):
 
-    import uuid
-
-    # ✅ create unique filename
-    unique_name = f"{uuid.uuid4()}_{file.filename}"
-    file_path = os.path.join(UPLOAD_FOLDER, unique_name)
-
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    result = cloudinary.uploader.upload(file.file)
 
     return {
-        "filename": unique_name,
-        "path": f"https://livestock-backend-x7k6.onrender.com/uploads/{unique_name}"
+        "filename": file.filename,
+        "path": result["secure_url"]
     }
