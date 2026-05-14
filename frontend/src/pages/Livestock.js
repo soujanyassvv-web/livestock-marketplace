@@ -181,7 +181,11 @@ function Livestock() {
            {
   item.Image && (
     <img
-      src={item.Image}
+      src={
+  item.Image.startsWith("http")
+    ? item.Image
+    : `https://livestock-backend-x7k6.onrender.com${item.Image}`
+}
       alt=""
       style={{
         width: "100%",
